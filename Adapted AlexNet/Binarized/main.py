@@ -5,12 +5,13 @@ import torchvision.transforms as transforms
 import model
 from torch.autograd import Variable
 import os
-from logger import Logger
+from tqdm import tqdm
+# from logger import Logger
 
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 best_acc = 0
 start_epoch = 0
-logger = Logger('./logs')
+# logger = Logger('./logs')
 
 # Dataset
 print('==> Preparing data..')
@@ -24,9 +25,9 @@ transform_test = transforms.Compose([
     transforms.ToTensor(),
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010))
 ])
-trainset = torchvision.datasets.CIFAR10(root='C:/Users/bryce/Desktop/CIFAR-10', train=True, download=False, transform=transform_train)
+trainset = torchvision.datasets.CIFAR10(root='CIFAR-10', train=True, download=True, transform=transform_train)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=128, shuffle=True, num_workers=0)
-testset = torchvision.datasets.CIFAR10(root='C:/Users/bryce/Desktop/CIFAR-10', train=False, download=False, transform=transform_test)
+testset = torchvision.datasets.CIFAR10(root='CIFAR-10', train=False, download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(testset, batch_size=100, shuffle=False, num_workers=0)
 
 
@@ -117,14 +118,13 @@ def test(epoch):
         best_acc = acc
 
     # Plot the model
-    info = {'loss': test_loss, 'accuracy': acc}
-    for tag, value in info.items():
-        logger.scalar_summary(tag, value, epoch+1)
-    for tag, value in model.named_parameters():
-        tag = tag.replace('.', '/')
-        logger.histo_summary(tag, value.data.cpu().numpy(), epoch+1)
-        logger.histo_summary(tag+'/grad', value.grad.data.cpu().numpy(), epoch+1)
-
-for epoch in range(start_epoch, start_epoch + 80):
+    # info = {'loss': test_loss, 'accuracy': acc}
+    # for tag, value in info.items():
+    #     logger.scalar_summary(tag, value, epoch+1)
+    # for tag, value in model.named_parameters():
+    #     tag = tag.replace('.', '/')
+    #     logger.histo_summary(tag, value.data.cpu().numpy(), epoch+1)
+    #     logger.histo_summary(tag+'/grad', value.grad.data.cpu().numpy(), epoch+1)
+for epoch in tqdm(range(start_epoch, start_epoch + 80), desc="Epoch Progress"):
     train(epoch)
     test(epoch)
